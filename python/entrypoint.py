@@ -13,14 +13,14 @@ parser = argparse.ArgumentParser(
 
 parser.add_argument('-d', '--templates-dir')      
 parser.add_argument('-x', '--extensions', nargs='*', default=['template', 'yaml'])
-parser.add_argument('-o', '--output-dir', default='/output/')
+parser.add_argument('-o', '--output-dir', default='/output')
 
 args = parser.parse_args()
 
 files = []
 for extension in args.extensions:
   files.extend(glob.glob(f'{args.templates_dir}/*.{extension}'))
-# print(files)
+table = []
 outputs = []
 for file in files:
   completed_process = subprocess.run(f'susscanner {file}', shell=True, capture_output=True)
@@ -32,17 +32,10 @@ for file in files:
   output_file = f'{args.output_dir}/{filename}_report.json' 
   with open(output_file, 'w', encoding='utf-8') as f:
       json.dump(output, f, ensure_ascii=False, indent=4)
+  filename = output['file']
+  score = output['sustainability_score']
+  table.append([score, filename, output_file])
 
-  # json.dump()
-  # print out our list of windows
-  # for x in range(len(output)):
-  #     print (output[x])
-# print(outputs)
-table = [['Score', 'Template File']]
-for report in outputs:
-  filename = report['file']
-  score = report['sustainability_score']
-  table.extend([score, filename])
-  # print(f'{score} \t {filename}')
-# table = [[1, 2222, 30, 500], [4, 55, 6777, 1]]
-print(tabulate(table, headers='firstrow', tablefmt='fancy_grid'))
+table.sort(key=lambda x: x[0])
+table.reverse()
+print(tabulate(table, headers=['Score', 'Template File', 'Report'], tablefmt='fancy_grid'))
