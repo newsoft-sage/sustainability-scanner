@@ -6,20 +6,20 @@ If you use CloudFormation and would like to know more about how NewsoftSage can 
 
 ![](https://github.com/newsoft-sage/sustainability-scanner/blob/main/doc/sus.gif)
 
+## Running
+
+Our Docker Image is available pre-built in our [public repository](https://gallery.ecr.aws/d5s0w9y8/sustainability-scanner) so you simply run a container and mount your CloudFormation directory to `/templates/`. You can also mount a directory to `/output/` to retrieve the reports for further ana
+
+```
+docker run --rm -v $(pwd)/examples/:/templates/ -v $(pwd)/output:/output/ public.ecr.aws/d5s0w9y8/sustainability-scanner
+```
+
 ## Building
 
 If you wish to build our docker image locally you can clone our repo and use the following.
 
 ```
 docker build -t sustainability-scanner .
-```
-
-## Running
-
-Once built you simply run the container and mount your CloudFormation directory to `/templates/`
-
-```
-docker run --rm -v $(pwd)/examples/:/templates/ sustainability-scanner
 ```
 
 ## Consulting
