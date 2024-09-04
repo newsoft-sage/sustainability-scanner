@@ -10,6 +10,6 @@ phases:
       - aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin $ECR_REPOSITORY
   build:
     commands:
-      - docker build -t $ECR_REPOSITORY:$IMAGE_NAME:$IMAGE_TAG .
-      - docker push $ECR_REPOSITORY:$IMAGE_NAME:$IMAGE_TAG
+      - docker build -t $IMAGE_NAME:$IMAGE_TAG .
+      - docker push $IMAGE_NAME:$IMAGE_TAG
 
