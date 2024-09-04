@@ -70,13 +70,11 @@ def _build_report_resources(failed_rule):
   # print(result)
   return result
 
-def build_report(extensions, templates_dir):
+def build_report(templates_dir, extensions=['json']):
   files = []
   for extension in extensions:
     files.extend(glob.glob(f'{templates_dir}/*.{extension}'))
-  return build_report(files)
 
-def build_report(files):
   table = []
   outputs = []
 

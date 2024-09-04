@@ -28,6 +28,7 @@ for file in files:
   completed_process = subprocess.run(f'susscanner {file}', shell=True, capture_output=True)
   # it returns a byte type so convert it to string
   str_output = completed_process.stdout.decode('utf-8')
+  print(f'str {str_output}')
   filename = Path(file).stem
   output = json.loads(str_output)
   outputs.append(output)
@@ -43,4 +44,4 @@ table.reverse()
 print(tabulate(table, headers=['Score', 'Template File', 'Report'], tablefmt='fancy_grid'))
 if args.junit_report:
    with open(args.junit_report, 'w', encoding='utf-8') as f:
-      f.write(build_report(files))
+      f.write(build_report(args.output_dir))
