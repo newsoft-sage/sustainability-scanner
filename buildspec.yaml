@@ -5,11 +5,11 @@ phases:
   #   commands:
   #     - docker pull public.ecr.aws/d5s0w9y8/sustainability-scanner:latest
     
-  # pre_build:
-  #   commands:
-  #     - mkdir output/
-  #     - docker run --rm -v $(pwd)/examples/:/templates/ -v $(pwd)/output/:/output/ public.ecr.aws/d5s0w9y8/sustainability-scanner:latest
+  pre_build:
+    commands:
+      - aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin $ECR_REPOSITORY
   build:
     commands:
-      - docker build -t public.ecr.aws/d5s0w9y8/sustainability-scanner:latest .
+      - docker build -t $ECR_REPOSITORY:$IMAGENAME:$IMAGE_TAG .
+      - docker push $ECR_REPOSITORY:$IMAGENAME:$IMAGE_TAG
 
