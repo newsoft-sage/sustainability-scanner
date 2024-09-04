@@ -78,7 +78,7 @@ def build_report(templates_dir, extensions=['json']):
   table = []
   outputs = []
 
-  report = ''
+  report = '<?xml version="1.0" encoding="UTF-8"?><testsuites>'
   for file in files:
     # input_file = f'{args.output_dir}/{filename}_report.json' 
     test_suite = {}
@@ -99,7 +99,12 @@ def build_report(templates_dir, extensions=['json']):
           report += tc_top + fr_top + fr_body + fr_tail + tc_tail
       tail = '</testsuite>'
       report += tail
+  test_suites_tail = '</testsuites>'
+  report += test_suites_tail
   return report
 # output_file = f'{args.output_dir}/report.xml' 
 # with open(output_file, 'w', encoding='utf-8') as f:
 #     f.write(report)
+
+if __name__ == "__main__":
+    print(build_report('output/'))
