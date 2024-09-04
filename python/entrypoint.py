@@ -6,6 +6,7 @@ import json
 import argparse
 from pathlib import Path
 from tabulate import tabulate
+from report import build_report
 
 parser = argparse.ArgumentParser(
                     prog='NewsoftSage susscanner',
@@ -14,6 +15,7 @@ parser = argparse.ArgumentParser(
 parser.add_argument('-d', '--templates-dir')      
 parser.add_argument('-x', '--extensions', nargs='*', default=['template', 'yaml'])
 parser.add_argument('-o', '--output-dir', default='/output')
+parser.add_argument('-r', '--junit-report', required=False)
 
 args = parser.parse_args()
 
@@ -39,3 +41,6 @@ for file in files:
 table.sort(key=lambda x: x[0])
 table.reverse()
 print(tabulate(table, headers=['Score', 'Template File', 'Report'], tablefmt='fancy_grid'))
+if args.junit_report:
+   with open(args.junit_report, 'w', encoding='utf-8') as f:
+      f.write(build_report(files))
