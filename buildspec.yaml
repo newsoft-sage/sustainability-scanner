@@ -1,0 +1,15 @@
+version: 0.2
+
+phases:
+  # install:
+  #   commands:
+  #     - docker pull public.ecr.aws/d5s0w9y8/sustainability-scanner:latest
+    
+  # pre_build:
+  #   commands:
+  #     - mkdir output/
+  #     - docker run --rm -v $(pwd)/examples/:/templates/ -v $(pwd)/output/:/output/ public.ecr.aws/d5s0w9y8/sustainability-scanner:latest
+  build:
+    commands:
+      - docker build -t public.ecr.aws/d5s0w9y8/sustainability-scanner:latest .
+
