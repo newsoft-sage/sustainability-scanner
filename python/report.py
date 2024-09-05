@@ -1,27 +1,9 @@
 #!/usr/bin/python
-# import sys
 import glob
-# import subprocess
 import json
-# import argparse
-# from pathlib import Path
+import time
 from tabulate import tabulate
-
-# parser = argparse.ArgumentParser(
-#                     prog='NewsoftSage output Processor',
-#                     description='NewsoftSage processor for outputting reports in different formats')
-
-# parser.add_argument('-d', '--templates-dir')      
-# parser.add_argument('-x', '--extensions', nargs='*', default=['json'])
-# parser.add_argument('-o', '--output-dir', default='/report')
-
-# args = parser.parse_args()
-
-# files = []
-# for extension in args.extensions:
-#   files.extend(glob.glob(f'{args.templates_dir}/*.{extension}'))
-# table = []
-# outputs = []
+from pathlib import Path
 
 # <?xml version="1.0" encoding="UTF-8"?>
 # <testsuites time="15.682687">
@@ -70,21 +52,24 @@ def _build_report_resources(failed_rule):
   # print(result)
   return result
 
-def build_report(templates_dir, extensions=['json']):
+def build_report(templates_dir, times, extensions=['json']):
   files = []
   for extension in extensions:
     files.extend(glob.glob(f'{templates_dir}/*.{extension}'))
 
   table = []
   outputs = []
-
-  report = '<?xml version="1.0" encoding="UTF-8"?><testsuites>'
+  print(times)
+  duration = (times['end_time'] - times['start_time'])
+  report = f'<?xml version="1.0" encoding="UTF-8"?><testsuites time="{duration}">'
   for file in files:
+    filename = Path(file).stem
+    duration = (times[f'{filename}_end_time'] - times[f'{filename}_start_time'])
     # input_file = f'{args.output_dir}/{filename}_report.json' 
     test_suite = {}
     with open(file, 'r', encoding='utf-8') as f:
       d = json.load(f)
-      top = f'<testsuite name="{d["file"]}">'
+      top = f'<testsuite name="{d["file"]}" time="{duration}">'
       report += top
       # Only report on failures for now
       if len(d['failed_rules']) > 0:
@@ -107,4 +92,17 @@ def build_report(templates_dir, extensions=['json']):
 #     f.write(report)
 
 if __name__ == "__main__":
-    print(build_report('output/'))
+    times = {}
+    times['start_time'] = time.perf_counter()
+    time.sleep(2)
+    times['end_time'] = time.perf_counter()
+    times['cloud9_report_start_time'] = time.perf_counter()
+    times['cloudfront-authorization-at-edge_report_start_time'] = time.perf_counter()
+    times['codecommit_report_start_time'] = time.perf_counter()
+    times['ecsapi-demo-cloudformation_report_start_time'] = time.perf_counter()
+    time.sleep(1)
+    times['cloud9_report_end_time'] = time.perf_counter()
+    times['cloudfront-authorization-at-edge_report_end_time'] = time.perf_counter()
+    times['codecommit_report_end_time'] = time.perf_counter()
+    times['ecsapi-demo-cloudformation_report_end_time'] = time.perf_counter()
+    print(build_report('output/', times))
