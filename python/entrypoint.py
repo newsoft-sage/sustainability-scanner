@@ -28,7 +28,7 @@ table = []
 outputs = []
 for file in files:
   filename = Path(file).stem
-  report_file = f'{filename}_report.json'
+  report_file = f'{filename}_report'
   times[f'{report_file}_start_time'] = time.perf_counter()
   completed_process = subprocess.run(f'susscanner {file}', shell=True, capture_output=True)
   # it returns a byte type so convert it to string
@@ -36,7 +36,7 @@ for file in files:
   print(f'str {str_output}')
   output = json.loads(str_output)
   outputs.append(output)
-  output_file = f'{args.output_dir}/{report_file}' 
+  output_file = f'{args.output_dir}/{report_file}.json' 
   with open(output_file, 'w', encoding='utf-8') as f:
       json.dump(output, f, ensure_ascii=False, indent=4)
   filename = output['file']
