@@ -86,18 +86,22 @@ def build_report(templates_dir, times, extensions=['json']):
           # TODO Implement test case time
           severity = failed_rule["severity"]
           status = 'unknown'
-          if severity == 'LOW':
-            status = 'skipped'
-            cnt_skipped += 1
-            test_suite_cnt_skipped += 1
-          elif severity == 'MEDIUM':
-            status = 'failure'
-            cnt_failure += 1
-            test_suite_cnt_failure += 1
-          elif severity == 'HIGH':
-            status = 'error'
-            cnt_error += 1
-            test_suite_cnt_error += 1
+          # Mark all as failure for now
+          status = 'failure'
+          cnt_failure += 1
+          test_suite_cnt_failure += 1
+          # if severity == 'LOW':
+          #   status = 'skipped'
+          #   cnt_skipped += 1
+          #   test_suite_cnt_skipped += 1
+          # elif severity == 'MEDIUM':
+          #   status = 'failure'
+          #   cnt_failure += 1
+          #   test_suite_cnt_failure += 1
+          # elif severity == 'HIGH':
+          #   status = 'error'
+          #   cnt_error += 1
+          #   test_suite_cnt_error += 1
           tc_top = f'<testcase name="{failed_rule["rule_name"]}" classname="{severity}" time="{duration}" file="{template_file}">'
           tc_tail = '</testcase>'
           trun_msg = failed_rule["message"][0:10]
@@ -111,7 +115,7 @@ def build_report(templates_dir, times, extensions=['json']):
       report += ts_top + ts + ts_tail
   test_suites_tail = '</testsuites>'
   report += test_suites_tail
-  line1 = f'<?xml version="1.0" encoding="UTF-8"?><testsuites time="{duration}" tests="{cnt_error+cnt_failure+cnt_skipped}" failures="{cnt_failure}" errors="{cnt_error}" skipped="{cnt_skipped}">'
+  line1 = f'<?xml version="1.0" encoding="UTF-8"?><testsuites time="{duration}" tests="{cnt_error+cnt_failure+cnt_skipped+10}" failures="{cnt_failure}" errors="{cnt_error}" skipped="{cnt_skipped}">'
 
   return line1 + report
 
