@@ -50,4 +50,6 @@ print(tabulate(table, headers=['Score', 'Template File', 'Report'], tablefmt='fa
 times['end_time'] = time.perf_counter()
 if args.junit_report:
    with open(args.junit_report, 'w', encoding='utf-8') as f:
-      f.write(build_report(args.output_dir, times))
+      report = build_report(args.output_dir, times) 
+      print(report)
+      f.write(report)
