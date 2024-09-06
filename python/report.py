@@ -29,17 +29,15 @@ from pathlib import Path
 # </testsuites>
 def _build_report_body(failed_rule):
   # print(failed_rule)
-  # print(failed_rule['rule_name'])
-  # table = []
   table = [
     ['Rule Name', failed_rule['rule_name']],
-    ['Severity', failed_rule["severity"]] #,
-    # ['Links', failed_rule["links"]],
+    ['Severity', failed_rule["severity"]]
+    # ['Message', failed_rule["message"]]
     # ['Resources', failed_rule["resources"]]
   ]
   result = tabulate(table)
-  # print(result)
-  return result
+  # # print(result)
+  return '\n'+result+'\n\nMessage\n-------\n'+failed_rule["message"]
 
 def _build_report_links(failed_rule):
   # result = tabulate(failed_rule["links"])
@@ -48,7 +46,11 @@ def _build_report_links(failed_rule):
   return result
 
 def _build_report_resources(failed_rule):
-  result = tabulate(failed_rule["resources"])
+  table = []
+  for resource in failed_rule['resources']:
+    table.append([resource['name'],resource['line']])
+  result = tabulate(table, headers=['Resources','Line Number'])
+  # result = tabulate(failed_rule['resources'], headers=['Resource','Line Number'])
   # print(result)
   return result
 
@@ -61,35 +63,57 @@ def build_report(templates_dir, times, extensions=['json']):
   outputs = []
   print(times)
   duration = (times['end_time'] - times['start_time'])
-  report = f'<?xml version="1.0" encoding="UTF-8"?><testsuites time="{duration}">'
+  report = ''
+  cnt_failure = 0
+  cnt_error = 0
+  cnt_skipped = 0
   for file in files:
     filename = Path(file).stem
     duration = (times[f'{filename}_end_time'] - times[f'{filename}_start_time'])
     # input_file = f'{args.output_dir}/{filename}_report.json' 
-    test_suite = {}
     with open(file, 'r', encoding='utf-8') as f:
       d = json.load(f)
-      top = f'<testsuite name="{d["file"]}" time="{duration}">'
-      report += top
+      test_suite_cnt_failure = 0
+      test_suite_cnt_error = 0
+      test_suite_cnt_skipped = 0
+      ts = ''
+      sus_score = d['sustainability_score']
+      template_file = d['file']
       # Only report on failures for now
       if len(d['failed_rules']) > 0:
         # print(d)
         for failed_rule in d['failed_rules']:
-          tc_top = f'<testcase name="{failed_rule["rule_name"]}">'
+          # TODO Implement test case time
+          severity = failed_rule["severity"]
+          status = 'unknown'
+          if severity == 'LOW':
+            status = 'skipped'
+            cnt_skipped += 1
+            test_suite_cnt_skipped += 1
+          elif severity == 'MEDIUM':
+            status = 'failure'
+            cnt_failure += 1
+            test_suite_cnt_failure += 1
+          elif severity == 'HIGH':
+            status = 'error'
+            cnt_error += 1
+            test_suite_cnt_error += 1
+          tc_top = f'<testcase name="{failed_rule["rule_name"]}" classname="{severity}" time="{duration}" file="{template_file}">'
           tc_tail = '</testcase>'
           trun_msg = failed_rule["message"][0:10]
-          fr_top = f'<failure message="{failed_rule["rule_name"]}" type="{failed_rule["rule_name"]}">'
-          fr_body = _build_report_body(failed_rule) + '\n\nLinks\n-----\n' + _build_report_links(failed_rule) + '\n\nResources\n' + _build_report_resources(failed_rule)
-          fr_tail = '</failure>'
-          report += tc_top + fr_top + fr_body + fr_tail + tc_tail
-      tail = '</testsuite>'
-      report += tail
+          fr_top = f'<{status} message="{failed_rule["rule_name"]}" type="{failed_rule["rule_name"]}">'
+          fr_body = str(sus_score) + ' ' + template_file + '\n' + _build_report_body(failed_rule) + '\n\nLinks\n-----\n' + _build_report_links(failed_rule) + '\n\n' + _build_report_resources(failed_rule)
+          fr_tail = f'</{status}>'
+          ts += tc_top + fr_top + fr_body + fr_tail + tc_tail
+      ts_tail = '</testsuite>'
+      ts_top = f'<testsuite name="{d["file"]}" time="{duration}" tests="{test_suite_cnt_error+test_suite_cnt_failure+test_suite_cnt_skipped}" failures="{test_suite_cnt_failure}" errors="{test_suite_cnt_error}" skipped="{test_suite_cnt_skipped}">'
+
+      report += ts_top + ts + ts_tail
   test_suites_tail = '</testsuites>'
   report += test_suites_tail
-  return report
-# output_file = f'{args.output_dir}/report.xml' 
-# with open(output_file, 'w', encoding='utf-8') as f:
-#     f.write(report)
+  line1 = f'<?xml version="1.0" encoding="UTF-8"?><testsuites time="{duration}" tests="{cnt_error+cnt_failure+cnt_skipped}" failures="{cnt_failure}" errors="{cnt_error}" skipped="{cnt_skipped}">'
+
+  return line1 + report
 
 if __name__ == "__main__":
     times = {}
