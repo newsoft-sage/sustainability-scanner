@@ -70,6 +70,7 @@ def build_report(templates_dir, metadata, extensions=['json']):
   cnt_resources = 0
   for file in files:
     filename = Path(file).stem
+    print(f'it is {filename}')
     resource_count = metadata[f'{filename}_resource_count']
     cnt_resources += resource_count
     duration = (metadata[f'{filename}_end_time'] - metadata[f'{filename}_start_time'])
