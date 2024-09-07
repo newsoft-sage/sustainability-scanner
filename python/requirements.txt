@@ -1,3 +1,5 @@
 argparse
 sustainability-scanner
 tabulate
+pyyaml
+cfn-flip

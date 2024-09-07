@@ -54,22 +54,25 @@ def _build_report_resources(failed_rule):
   # print(result)
   return result
 
-def build_report(templates_dir, times, extensions=['json']):
+def build_report(templates_dir, metadata, extensions=['json']):
   files = []
   for extension in extensions:
     files.extend(glob.glob(f'{templates_dir}/*.{extension}'))
 
   table = []
   outputs = []
-  print(times)
-  duration = (times['end_time'] - times['start_time'])
+  print(metadata)
+  duration = (metadata['end_time'] - metadata['start_time'])
   report = ''
   cnt_failure = 0
   cnt_error = 0
   cnt_skipped = 0
+  cnt_resources = 0
   for file in files:
     filename = Path(file).stem
-    duration = (times[f'{filename}_end_time'] - times[f'{filename}_start_time'])
+    resource_count = metadata[f'{filename}_resource_count']
+    cnt_resources += resource_count
+    duration = (metadata[f'{filename}_end_time'] - metadata[f'{filename}_start_time'])
     # input_file = f'{args.output_dir}/{filename}_report.json' 
     with open(file, 'r', encoding='utf-8') as f:
       d = json.load(f)
@@ -110,27 +113,32 @@ def build_report(templates_dir, times, extensions=['json']):
           fr_tail = f'</{status}>'
           ts += tc_top + fr_top + fr_body + fr_tail + tc_tail
       ts_tail = '</testsuite>'
-      ts_top = f'<testsuite name="{d["file"]}" time="{duration}" tests="{test_suite_cnt_error+test_suite_cnt_failure+test_suite_cnt_skipped+4}" failures="{test_suite_cnt_failure}" errors="{test_suite_cnt_error}" skipped="{test_suite_cnt_skipped}">'
+      ts_top = f'<testsuite name="{d["file"]}" time="{duration}" tests="{resource_count}" failures="{test_suite_cnt_failure}" errors="{test_suite_cnt_error}" skipped="{test_suite_cnt_skipped}">'
 
       report += ts_top + ts + ts_tail
   test_suites_tail = '</testsuites>'
   report += test_suites_tail
-  line1 = f'<?xml version="1.0" encoding="UTF-8"?><testsuites time="{duration}" tests="{cnt_error+cnt_failure+cnt_skipped}" failures="{cnt_failure}" errors="{cnt_error}" skipped="{cnt_skipped}">'
+  line1 = f'<?xml version="1.0" encoding="UTF-8"?><testsuites time="{duration}" tests="{cnt_resources}" failures="{cnt_failure}" errors="{cnt_error}" skipped="{cnt_skipped}">'
 
   return line1 + report
 
 if __name__ == "__main__":
-    times = {}
-    times['start_time'] = time.perf_counter()
+    metadata = {}
+    metadata['start_time'] = time.perf_counter()
     time.sleep(2)
-    times['end_time'] = time.perf_counter()
-    times['cloud9_report_start_time'] = time.perf_counter()
-    times['cloudfront-authorization-at-edge_report_start_time'] = time.perf_counter()
-    times['codecommit_report_start_time'] = time.perf_counter()
-    times['ecsapi-demo-cloudformation_report_start_time'] = time.perf_counter()
+    metadata['end_time'] = time.perf_counter()
+    metadata['cloud9_report_start_time'] = time.perf_counter()
+    metadata['cloudfront-authorization-at-edge_report_start_time'] = time.perf_counter()
+    metadata['codecommit_report_start_time'] = time.perf_counter()
+    metadata['ecsapi-demo-cloudformation_report_start_time'] = time.perf_counter()
     time.sleep(1)
-    times['cloud9_report_end_time'] = time.perf_counter()
-    times['cloudfront-authorization-at-edge_report_end_time'] = time.perf_counter()
-    times['codecommit_report_end_time'] = time.perf_counter()
-    times['ecsapi-demo-cloudformation_report_end_time'] = time.perf_counter()
-    print(build_report('output/', times))
+    metadata['cloud9_report_end_time'] = time.perf_counter()
+    metadata['cloudfront-authorization-at-edge_report_end_time'] = time.perf_counter()
+    metadata['codecommit_report_end_time'] = time.perf_counter()
+    metadata['ecsapi-demo-cloudformation_report_end_time'] = time.perf_counter()
+    metadata['cloud9_report_resource_count'] = 8
+    metadata['cloudfront-authorization-at-edge_report_resource_count'] = 40
+    metadata['codecommit_report_resource_count'] = 1
+    metadata['ecsapi-demo-cloudformation_report_resource_count'] = 56
+
+    print(build_report('output/', metadata))
